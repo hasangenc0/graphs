@@ -89,7 +89,7 @@ void kruskalMst (struct Graph* graph) {
     }
   }
 
-  // Write to the MST
+  // Print the MST
   for (i = 0; i < e; ++i)
     printf("%d -- %d == %d\n", result[i].src, result[i].dest, result[i].weight);
 }
