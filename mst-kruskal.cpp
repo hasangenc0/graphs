@@ -123,7 +123,7 @@ int main() {
   graph->edge[4].dest = 3;
   graph->edge[4].weight = 4;
 
-  // Write to the Graph
+  // Print the Graph
   for (int i = 0; i < graph->E; ++i)
     printf("%d -- %d == %d\n", graph->edge[i].src, graph->edge[i].dest, graph->edge[i].weight);
 
