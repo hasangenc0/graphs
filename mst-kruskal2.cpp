@@ -1,5 +1,5 @@
 #include <iostream>
- 
+
 struct Edge {
   int src, dest, weight;
 };
@@ -10,6 +10,7 @@ struct Graph {
   struct Edge* edge;
 };
 
+// Subsets contains connected nodes with hierarchy
 struct Subsets {
   int parent, rank;
 };
@@ -24,6 +25,7 @@ void kruskalMst (struct Graph* graph);
 int main() {
   int V = 4;  // Number of vertices in graph
   int E = 5;  // Number of edges in graph
+
   struct Graph* graph = createGraph(V, E);
   // add edge 0-1
   graph->edge[0].src = 0;
@@ -50,13 +52,9 @@ int main() {
   graph->edge[4].dest = 3;
   graph->edge[4].weight = 4;
 
-  // Print the Graph
-  for (int i = 0; i < graph->E; ++i)
-    printf("%d -- %d == %d\n", graph->edge[i].src, graph->edge[i].dest, graph->edge[i].weight);
-
   std::cout<<"After Kruskal"<<std::endl;
   kruskalMst(graph);
-  
+
 }
 
 // Function Implementations
@@ -70,24 +68,29 @@ struct Graph* createGraph(int V, int E) {
 };
 
 int find(struct Subsets subsets[], int V) {
-  if(subsets[V].parent != V) {
-    subsets[V].parent = find(subsets, subsets[V].parent);
-  }
-  return subsets[V].parent;
+    // Finds root of subtrees
+    if( subsets[V].parent != V ) {
+       subsets[V].parent = find(subsets, subsets[V].parent); 
+    }
+    return subsets[V].parent;
 }
 
 void Union(struct Subsets subsets[], int x, int y){
-  int xroot = find(subsets, x);
-  int yroot = find(subsets, y);
+    int xroot = find(subsets, x); // root of node x
+    int yroot = find(subsets, y); // root of node y
 
-  if (subsets[xroot].rank < subsets[yroot].rank)
-    subsets[xroot].parent = yroot;
-  else if (subsets[xroot].rank > subsets[yroot].rank)
-    subsets[yroot].parent = xroot;
-  else {
-    subsets[yroot].parent = xroot;
-    subsets[xroot].rank++;
-  }
+    // Make parent of root which node has bigger rank
+    if(subsets[xroot].rank > subsets[yroot].rank) { // 
+        subsets[yroot].parent = xroot;
+    }
+    else if (subsets[x].rank < subsets[y].rank) {
+        subsets[xroot].parent = yroot;
+    }
+    // if ranks are equal, choose a ordinary root and increase it's rank
+    else { 
+        subsets[y].parent = xroot;
+        subsets[x].rank++;
+    }
 }
 
 void isort(struct Graph* graph) {
@@ -103,14 +106,18 @@ void isort(struct Graph* graph) {
 }
 
 void kruskalMst (struct Graph* graph) {
-int V = graph->V;
-struct Edge result[V];  // Tnis will store the resultant MST
-int e = 0;  // An index variable, used for result
-int i = 0;  // An index variable, used for sorted edges
+  int V = graph->V;
+  struct Edge result[V];  // Tnis will store the resultant MST
+  int e = 0;  // An index variable, used for result
+  int i = 0;  // An index variable, used for sorted edges
 
-isort(graph);
+  isort(graph);
 
-// Create V subsets with single elements
+  // Print the Graph
+  for (int i = 0; i < graph->E; ++i)
+    printf("%d -- %d == %d\n", graph->edge[i].src, graph->edge[i].dest, graph->edge[i].weight);
+    std::cout<<"----------"<<std::endl;
+  // Create V subsets with single elements
   struct Subsets* subsets = (struct Subsets*)malloc(V *sizeof(struct Subsets));
   for(int v = 0; v < V; v++) {
     subsets[v].parent = v;
@@ -123,12 +130,14 @@ isort(graph);
     // the index for next iteration
     struct Edge next = graph->edge[i++];
 
+    // Find root of subsets
     int x = find(subsets, next.src);
     int y = find(subsets, next.dest);
 
+    // if roots of subsets are not equal to each other then cycle can't	happen
     if(x != y) {
       result[e++] = next;
-      Union(subsets, x, y);
+      Union(subsets, x,y);
     }
   }
 
